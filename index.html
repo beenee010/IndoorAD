@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#132943">
+<title>AirGuard · 공기질 관리</title><link rel="stylesheet" href="/styles.css"><script src="/script.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문 바로가기</a>
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="#overview"><span class="brand-mark" data-icon="wind"></span><span>airguard<small>AIR QUALITY MONITOR</small></span></a>
+<p class="nav-label">워크스페이스</p>
+<nav aria-label="주 메뉴">
+<a href="#overview" data-page="overview"><span data-icon="grid"></span>대시보드</a>
+<a href="#history" data-page="history"><span data-icon="chart"></span>기록 분석</a>
+<a href="#alerts" data-page="alerts"><span data-icon="bell"></span>경고 이력<span class="nav-count" id="alert-count" hidden></span></a>
+<a href="#import" data-page="import"><span data-icon="upload"></span>데이터 가져오기</a>
+<a href="#devices" data-page="devices"><span data-icon="sensor"></span>장치와 센서</a>
+<a href="#outdoor" data-page="outdoor"><span data-icon="map"></span>외부 대기질</a>
+</nav>
+<div class="sidebar-footer"><div class="workspace-note"><span class="tiny-dot"></span>센서 데이터 워크스페이스<small>기록과 실시간을 한곳에서</small></div><a href="#settings" class="settings-link" data-page="settings"><span data-icon="settings"></span>설정</a><div class="profile"><span class="avatar" data-icon="user"></span><div><strong>로컬 관리자</strong><small>이 장치의 관리 화면</small></div></div></div>
+</aside>
+<div class="app-shell"><header class="topbar"><div class="breadcrumbs"><button class="icon-button mobile-menu" id="menu-button" aria-label="메뉴 열기" aria-expanded="false"><span data-icon="menu"></span></button><span>워크스페이스</span><span class="breadcrumb-divider">/</span><strong id="breadcrumb-page">대시보드</strong></div><div class="topbar-right"><span id="connection-status" class="connection-status"><i></i>연결 확인 중</span><span class="timezone">Asia/Seoul</span></div></header>
+<main id="content" tabindex="-1">
+<div class="page-heading"><div><p class="eyebrow" id="page-eyebrow">AIR QUALITY OVERVIEW</p><h1 id="page-title">공기질 대시보드</h1><p class="page-description" id="page-description">측정값부터 변화의 원인까지 공간의 공기를 살펴보세요</p></div><div class="heading-actions"><button class="button secondary" id="refresh-button"><span data-icon="refresh"></span>새로고침</button><button class="button primary" id="open-import"><span data-icon="upload"></span>CSV 가져오기</button></div></div>
+<section class="filter-bar" aria-label="데이터 조회 조건"><div class="field device-field"><label for="device-select">측정 장치</label><select id="device-select"><option>불러오는 중</option></select></div><div class="field"><label id="mode-label">조회 모드</label><div class="segmented" role="group" aria-labelledby="mode-label"><button id="historical-mode" aria-pressed="true">기록 분석</button><button id="live-mode" aria-pressed="false"><i></i>실시간</button></div></div><div class="field period-field"><label for="period-select">조회 기간</label><select id="period-select"><option value="900">최근 15분</option><option value="3600">최근 1시간</option><option value="86400" selected>최근 24시간</option><option value="604800">최근 7일</option><option value="all">전체 기록</option><option value="custom">직접 선택</option></select></div><div class="filter-meta"><span id="range-label">측정 기간 확인 중</span><small id="sample-label">원본 센서 데이터</small></div></section>
+<form id="custom-range" class="custom-range" hidden><label>시작 <input type="datetime-local" id="range-from" required></label><label>종료 <input type="datetime-local" id="range-to" required></label><button class="button primary" type="submit">기간 적용</button><small>한국 시간 기준</small></form>
+<div id="page-error" class="error-banner" role="alert" hidden></div><div id="page-loading" class="loading-bar" aria-live="polite" hidden>측정 데이터를 불러오고 있습니다</div><div id="view"></div>
+<footer class="main-footer"><span>AirGuard <span class="footer-dot">·</span> Arduino air quality workspace</span><span>측정 시각은 한국 시간 기준 <span class="footer-dot">·</span> AI 예측 준비 단계</span></footer>
+</main></div>
+<dialog id="import-dialog" aria-labelledby="import-title"><div class="dialog-head"><div><p class="eyebrow">IMPORT SENSOR DATA</p><h2 id="import-title">CSV 데이터 가져오기</h2></div><button class="icon-button" id="close-import" aria-label="가져오기 창 닫기"><span data-icon="close"></span></button></div><p class="muted">아두이노의 측정 기록을 검증하고 선택한 장치에 저장합니다</p><div class="import-steps"><span id="step-file" class="active">1 파일 선택</span><span id="step-preview">2 검증과 미리보기</span><span id="step-save">3 저장 완료</span></div><div class="form-grid"><label>측정 장치<select id="import-device"></select></label><label>기록 시간대<select id="import-timezone"><option value="Asia/Seoul">Asia/Seoul · 한국 시간</option><option value="UTC">UTC</option></select></label></div><label class="file-zone"><span class="upload-symbol" data-icon="upload"></span><strong id="file-name">측정 CSV 파일을 선택하세요</strong><span>UTF-8 CSV · 최대 20 MB</span><input type="file" id="csv-file" accept=".csv,text/csv"><span class="file-action">파일 선택</span></label><div class="csv-columns">지원 컬럼 <code>timestamp</code> <code>dht_temp_C</code> <code>dht_humi_pct</code> <code>am_temp_C</code> <code>am_humi_pct</code> <code>co2_ppm</code> <code>voc_level</code> <code>pm25_ugm3</code></div><div id="import-error" class="error-banner" role="alert" hidden></div><div id="import-result" aria-live="polite"></div><div class="dialog-actions"><span class="muted">과거 기록은 경고음을 발생시키지 않습니다</span><button id="validate-import" class="button primary" disabled>파일 검증</button><button id="commit-import" class="button primary" hidden>검증 데이터 저장</button></div></dialog>
+<dialog id="rule-review-dialog" aria-labelledby="rule-review-title">
+  <form id="rule-review-form">
+    <div class="dialog-head"><h2 id="rule-review-title">경고 규칙 변경 검토</h2></div>
+    <p class="muted" id="rule-review-summary"></p>
+    <div id="rule-review-diff" class="table-scroll"></div>
+    <label for="rule-change-reason" class="rule-reason-label">변경 사유</label>
+    <textarea id="rule-change-reason" name="reason" maxlength="300" rows="3" required
+      placeholder="기준을 조정하는 이유를 적어 주세요"></textarea>
+    <div id="rule-review-error" class="error-banner" role="alert" hidden></div>
+    <div class="dialog-actions">
+      <button type="button" id="rule-review-cancel" class="button secondary">취소</button>
+      <button type="submit" id="rule-review-apply" class="button primary">변경 적용</button>
+    </div>
+  </form>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>

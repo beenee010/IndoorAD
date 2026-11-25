@@ -1,0 +1,35 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+test('sound is live-only and signals severity escalation once without replaying old alerts', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../script.js'), 'utf8');
+  const logic = source.slice(source.indexOf('function alertSoundKey('), source.indexOf('function playSound('));
+  let sounds = 0;
+  const state = { sound: true, mode: 'historical', seenAlerts: new Set(), dashboard: { alerts: [] } };
+  const context = vm.createContext({ state, playSound: () => { sounds++; } });
+  vm.runInContext(logic, context);
+  const alert = { id: 'alert-1', source: 'historical', status: 'active', severity: 'warning' };
+  state.dashboard.alerts = [alert];
+  context.checkNewAlerts();
+  assert.equal(sounds, 0);
+  state.mode = 'live';
+  alert.source = 'live';
+  context.checkNewAlerts();
+  context.checkNewAlerts();
+  assert.equal(sounds, 1);
+  alert.severity = 'critical';
+  context.checkNewAlerts();
+  context.checkNewAlerts();
+  assert.equal(sounds, 2);
+  alert.status = 'acknowledged';
+  alert.severity = 'warning';
+  context.checkNewAlerts();
+  assert.equal(sounds, 2);
+  state.sound = false;
+  state.dashboard.alerts = [{ id: 'alert-2', source: 'live', status: 'active', severity: 'critical' }];
+  context.checkNewAlerts();
+  assert.equal(sounds, 2);
+});

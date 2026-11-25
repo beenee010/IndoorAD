@@ -1,0 +1,12 @@
+{
+  "name": "airguard-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Arduino air quality monitoring and CSV analytics dashboard",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test test/*.test.js",
+    "check": "node --check server.js && node --check script.js && node --check lib/engine.js && node --check lib/store.js"
+  },
+  "engines": { "node": ">=22.13.0" }
+}
